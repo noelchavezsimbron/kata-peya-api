@@ -1,0 +1,73 @@
+basePath: /api/kata-peya/v1
+definitions:
+  PetResponse:
+    properties:
+      age:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      vaccines:
+        items:
+          type: string
+        type: array
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a kata api server.
+  title: Kata Peya API
+  version: "1.0"
+paths:
+  /health:
+    get:
+      consumes:
+      - '*/*'
+      description: Get the status of server.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Show the status of server.
+      tags:
+      - healthCheck
+  /pets:
+    get:
+      description: get pets
+      parameters:
+      - description: get only vaccinated pets
+        format: boolean
+        in: query
+        name: vaccinated
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/PetResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: List pets
+      tags:
+      - pets
+schemes:
+- http
+swagger: "2.0"

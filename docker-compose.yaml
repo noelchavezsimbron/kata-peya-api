@@ -1,0 +1,51 @@
+version: '3'
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "5775:5775/udp"
+      - "6831:6831/udp"
+      - "6832:6832/udp"
+      - "5778:5778/tcp"
+      - "16686:16686"
+      - "14268:14268"
+      - "9411:9411"
+    networks:
+      - jaeger-example
+  db:
+    container_name: db_mysql
+    image: mysql:8
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: pets
+      MYSQL_ROOT_PASSWORD: mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    expose:
+      - 3306
+    volumes:
+      - "./db/migrations/init.sql:/docker-entrypoint-initdb.d/init.sql"
+    networks:
+      - jaeger-example
+  api:
+    container_name: peya-api
+    build:
+      context: .
+    environment:
+      SERVER_PORT: 8080
+      OTEL_EXPORTER_JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      DB_HOST: db_mysql
+      DB_PORT: 3306
+      DB_PASSWORD: mysql
+      DB_DATABASE: pets
+    ports:
+      - "8080:8080"
+    networks:
+      - jaeger-example
+    depends_on:
+      - jaeger
+      - db
+
+networks:
+  jaeger-example:
